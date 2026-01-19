@@ -1,0 +1,3 @@
+[submodule "appFramework"]
+	path = appFramework
+	url = https://github.com/sripriya22/appFramework.git
