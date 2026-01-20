@@ -1,0 +1,24 @@
+{
+  "$schema": "../../appFramework/matlab/src/+appFramework/+projection/projection-schema.json",
+  "MATLABClass": "SimBiology.Parameter",
+  "JSClass": "Parameter",
+  "ReferenceIDProperty": "SessionID",
+  "Properties": {
+    "SessionID": {
+      "Type": "double",
+      "ReadOnly": true
+    },
+    "Name": {
+      "Type": "string",
+      "ReadOnly": true
+    },
+    "Value": {
+      "Type": "double",
+      "ReadOnly": true
+    },
+    "Units": {
+      "Type": "string",
+      "ReadOnly": true
+    }
+  }
+}

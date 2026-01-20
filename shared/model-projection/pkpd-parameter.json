@@ -1,0 +1,37 @@
+{
+  "$schema": "../../appFramework/matlab/src/+appFramework/+projection/projection-schema.json",
+  "MATLABClass": "PKPD.Parameter",
+  "JSClass": "PKPDParameter",
+  "Properties": {
+    "Name": {
+      "Type": "string",
+      "ReadOnly": true,
+      "Description": "Derived from the referenced ModelParameter"
+    },
+    "Units": {
+      "Type": "string",
+      "ReadOnly": true,
+      "Description": "Derived from the referenced ModelParameter"
+    },
+    "Min": {
+      "Type": "double"
+    },
+    "Max": {
+      "Type": "double"
+    },
+    "Scale": {
+      "Type": "string",
+      "Description": "Either 'linear' or 'log'"
+    },
+    "Value": {
+      "Type": "double"
+    },
+    "FlagFit": {
+      "Type": "logical"
+    },
+    "PercCV": {
+      "Type": "double",
+      "Description": "Coefficient of variation percentage"
+    }
+  }
+}

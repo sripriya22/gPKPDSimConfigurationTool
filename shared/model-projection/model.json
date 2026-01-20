@@ -1,0 +1,40 @@
+{
+  "$schema": "../../appFramework/matlab/src/+appFramework/+projection/projection-schema.json",
+  "MATLABClass": "SimBiology.Model",
+  "JSClass": "SimBiologyModel",
+  "ReferenceIDProperty": "SessionID",
+  "Properties": {
+    "SessionID": {
+      "Type": "double",
+      "ReadOnly": true
+    },
+    "Name": {
+      "Type": "string",
+      "ReadOnly": true
+    },
+    "Species": {
+      "Type": "SimBiology.Species",
+      "IsArray": true,
+      "IsReference": false,
+      "ReadOnly": true
+    },
+    "Parameters": {
+      "Type": "SimBiology.Parameter",
+      "IsArray": true,
+      "IsReference": false,
+      "ReadOnly": true
+    },
+    "Doses": {
+      "Type": "SimBiology.Dose",
+      "IsArray": true,
+      "IsReference": false,
+      "ReadOnly": true
+    },
+    "Variants": {
+      "Type": "SimBiology.Variant",
+      "IsArray": true,
+      "IsReference": false,
+      "ReadOnly": true
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "../../appFramework/matlab/src/+appFramework/+projection/projection-schema.json",
+  "MATLABClass": "PKPD.Analysis",
+  "JSClass": "Analysis",
+  "Properties": {
+    "ModelObj": {
+      "Type": "SimBiology.Model",
+      "IsReference": false,
+      "ReadOnly": true
+    },
+    "StartTime": {
+      "Type": "double"
+    },
+    "TimeStep": {
+      "Type": "double"
+    },
+    "StopTime": {
+      "Type": "double"
+    },
+    "FitFunctionName": {
+      "Type": "string"
+    },
+    "UseFitBounds": {
+      "Type": "logical"
+    },
+    "FitErrorModel": {
+      "Type": "string"
+    },
+    "NumPopulationRuns": {
+      "Type": "double"
+    },
+    "ModelDocumentation": {
+      "Type": "string"
+    },
+    "SelectedSpecies": {
+      "Type": "SimBiology.Species",
+      "IsArray": true,
+      "IsReference": true
+    },
+    "SelectedParams": {
+      "Type": "PKPD.Parameter",
+      "IsArray": true,
+      "IsReference": false
+    },
+    "SelectedDoses": {
+      "Type": "SimBiology.Dose",
+      "IsArray": true,
+      "IsReference": true
+    },
+    "SelectedVariants": {
+      "Type": "SimBiology.Variant",
+      "IsArray": true,
+      "IsReference": true
+    }
+  }
+}
