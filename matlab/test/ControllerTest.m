@@ -147,5 +147,52 @@ classdef ControllerTest < matlab.unittest.TestCase
                 end
             end
         end
+        
+        function testSavedAnalysisValidForGPKPDSim(testCase)
+            % Integration test: Verify saved Analysis can be loaded by PKPD.controller
+            % and produce valid JSON without errors
+            
+            matFile = fullfile(testCase.TestDataFolder, 'CaseStudy1', ...
+                'casestudy1_TwoCompPK_final.mat');
+            testCase.Controller.loadFromAnalysisFile(matFile);
+            
+            saveFile = fullfile(testCase.TempFolder, 'test_gpkpdsim_compat.mat');
+            testCase.Controller.save(saveFile);
+            
+            % Verify saved Analysis has required fields set by prepareAnalysisForSave
+            saved = load(saveFile);
+            testCase.verifyNotEmpty(saved.Analysis.PlotSpeciesTable);
+            testCase.verifyEqual(size(saved.Analysis.PlotSpeciesTable, 2), 3);
+            testCase.verifyNotEmpty(saved.Analysis.SimulationPlotSettings);
+            testCase.verifyEqual(saved.Analysis.SimulationPlotSettings.Title, 'Plot 1');
+            testCase.verifyNotEmpty(saved.Analysis.ColorMap1);
+            testCase.verifyEqual(size(saved.Analysis.ColorMap1, 2), 3);
+            
+            % Load saved file into PKPD.controller
+            pkpdCtrl = PKPD.controller();
+            pkpdCtrl.loadProject(saveFile);
+            
+            % Verify session loaded successfully
+            testCase.verifyNotEmpty(pkpdCtrl.session);
+            testCase.verifyClass(pkpdCtrl.session, 'PKPD.Analysis');
+            
+            % Verify trimSession produces valid struct without errors
+            trimmedSession = pkpdCtrl.trimSession();
+            testCase.verifyClass(trimmedSession, 'struct');
+            
+            % Verify JSON encoding works
+            jsonStr = jsonencode(trimmedSession);
+            testCase.verifyClass(jsonStr, 'char');
+            testCase.verifyGreaterThan(length(jsonStr), 0);
+            
+            % Verify critical fields exist in trimmed session
+            testCase.verifyTrue(isfield(trimmedSession, 'Parameters'));
+            testCase.verifyTrue(isfield(trimmedSession, 'TimeSettings'));
+            testCase.verifyTrue(isfield(trimmedSession, 'PlotSpeciesTable'));
+            
+            % Verify PlotSpeciesTable is populated
+            testCase.verifyNotEmpty(trimmedSession.PlotSpeciesTable);
+            testCase.verifyGreaterThan(height(trimmedSession.PlotSpeciesTable), 0);
+        end
     end
 end

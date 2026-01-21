@@ -198,6 +198,8 @@ classdef Controller < appFramework.AbstractController
             
             obj.validateRootObject();
             
+            obj.prepareAnalysisForSave();
+            
             Analysis = obj.RootObject; %#ok<PROPLC>
             save(inputs.FilePath, 'Analysis');
             
@@ -252,11 +254,11 @@ classdef Controller < appFramework.AbstractController
             end
         end
         
-        function analysis = loadAnalysisFromMatfile(~, filePath)
+        function analysis = loadAnalysisFromMatfile(obj, filePath)
             % Load PKPD.Analysis object from .mat file
             
             arguments
-                ~
+                obj
                 filePath (1,1) string
             end
             
@@ -269,10 +271,95 @@ classdef Controller < appFramework.AbstractController
             
             if isfield(matData, 'Analysis') && isa(matData.Analysis, 'PKPD.Analysis')
                 analysis = matData.Analysis;
+                obj.remapModelComponents(analysis);
             else
                 error('gPKPDSimConfigurationTool:InvalidAnalysisFile', ...
                     'File does not contain a valid PKPD.Analysis object');
             end
+        end
+        
+        function remapModelComponents(~, analysis)
+            % Remap SelectedSpecies, SelectedDoses, SelectedVariants to current ModelObj
+            % This is necessary because loaded Analysis objects reference old model instances
+            
+            if isempty(analysis.ModelObj)
+                return;
+            end
+            
+            % Models loaded from before 19b (UDD models instead of MCOS models) will reload
+            % references to model components as orphaned objects instead of pointing to the
+            % same handle. Update these references (species and doses) to point to the current
+            % model components.
+            tfUDDModel = isempty(analysis.SelectedSpecies(1).ParentModel);
+            if tfUDDModel
+                allSpecies = analysis.ModelObj.Species;
+                remappedSpecies = SimBiology.Species.empty;                
+                for i = numel(analysis.SelectedSpecies):-1:1
+                    oldSpecies = analysis.SelectedSpecies(i);
+                    newSpecies = sbioselect(allSpecies, 'UUID', oldSpecies.UUID);
+                    remappedSpecies(end+1) = newSpecies;
+                end                
+                analysis.SelectedSpecies = remappedSpecies;
+            
+                allDoses = getdose(analysis.ModelObj);
+                remappedDoses = SimBiology.Dose.empty;                
+                for i = numel(analysis.SelectedDoses):-1:1
+                    oldDose = analysis.SelectedDoses(i);
+                    newDose = sbioselect(allDoses, 'UUID', oldDose.UUID);
+                    remappedDoses(end+1) = newDose;
+                end                
+                analysis.SelectedDoses = remappedDoses;
+            end
+            
+            % Remap SelectedVariants using UUID
+            if ~isempty(analysis.SelectedVariants)
+                allVariants = getvariant(analysis.ModelObj);
+                remappedVariants = SimBiology.Variant.empty;
+                
+                for i = 1:numel(analysis.SelectedVariants)
+                    oldVariant = analysis.SelectedVariants(i);
+                    newVariant = sbioselect(allVariants, 'UUID', oldVariant.UUID);
+                    if ~isempty(newVariant)
+                        remappedVariants(end+1) = newVariant; %#ok<AGROW>
+                    end
+                end
+                
+                analysis.SelectedVariants = remappedVariants;
+            end
+        end
+        
+        function prepareAnalysisForSave(obj)
+            % Prepare Analysis object for saving by setting required properties
+            % This ensures the saved Analysis is compatible with gPKPDSim
+            
+            analysis = obj.RootObject;
+            
+            % Update StatesToLog to log all selected species
+            analysis.ModelObj.getconfigset().RuntimeOptions.StatesToLog = ...
+                analysis.SelectedSpecies;
+            
+            % Set up PlotSpeciesTable
+            numSelectedSpecies = numel(analysis.SelectedSpecies);
+            analysis.PlotSpeciesTable = cell(numSelectedSpecies, 3);
+            names = {analysis.SelectedSpecies.PartiallyQualifiedName}';
+            analysis.PlotSpeciesTable(:, 2) = names;
+            analysis.PlotSpeciesTable(:, 3) = names;
+            analysis.updateSpeciesLineStyles();
+            
+            % Create SimulationPlotSettings
+            % Must create temporary axes to create PlotSettings object
+            f = figure('Visible', 'off');
+            ax = axes(f);
+            ps = PKPD.PlotSettings(ax);
+            delete(f);
+            
+            analysis.SimulationPlotSettings = getSummary(ps);
+            analysis.SimulationPlotSettings.Title = 'Plot 1';
+            analysis.SimulationPlotSettings.XLabel = 'Time';
+            analysis.SimulationPlotSettings.YLabel = 'States';
+            
+            % Set ColorMap
+            analysis.ColorMap1 = parula;
         end
     end
 end
